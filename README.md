@@ -1,97 +1,89 @@
-<img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
+<img width="1920" height="1200" alt="Screenshot 2025-08-02 073247" src="https://github.com/user-attachments/assets/4b8c576c-5623-40bc-b45e-a9d48f1c61fb" /><img width="1920" height="1200" alt="Screenshot 2025-08-02 073247" src="https://github.com/user-attachments/assets/b511d8fd-684a-4804-a4de-e79d178ebc9a" /><img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# [Leaf Fortune] 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: [Phenix]
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: Neeraja R Nair - College of engineering Karunagappally
+- Member 2: Zenjith A - College of engineering Karunagapplly
+  
 
 ### Project Description
-[2-3 lines about what your project does]
+Leaf Fortune teller
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+We check the astrology of the leaf to guide him for a better future.
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+we check the patterns of the leaf. To predict the fortune to guide him for a successful life.  
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
-
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+- Languages used = HTML, CSS, JS
+- Frameworks used = TAILWIND CSS, GOOGLE APIs
+- Tools used = VS CODE, BROWSERs, GOOGLE AI STUDIO
 
 ### Implementation
-For Software:
-# Installation
-[commands]
+For Software:Leaf Divination is a single-page web app built with HTML, JavaScript, and Tailwind CSS. Users upload a photo of a leaf. The app previews the image, sends it to the Google Gemini AI API for analysis, and displays a creative fortune based on the leaf’s features.
+All logic runs in the browser—no backend needed, except for calling the Gemini API. Users can upload more images for new readings, and errors are handled with simple, clear messages. The app is easy to use, fast, and fully interactive.
+Installation
+[commands = # Install a simple static server globally (if you haven't already)
+npm install -g serve
 
-# Run
-[commands]
+ Go to your project directory (where index.html is located)
+cd path/to/your/leaf-divination
+
+ Run the local server
+serve .
+
+Now open the provided localhost URL in your browser
+
+ Run
+commands = # Install serve (only needed once)
+npm install -g serve
+
+Move to your project directory (where index.html is)
+cd path/to/your/leaf-divination
+
+ Start the local server
+serve .
+
+ Open the URL provided (often http://localhost:3000) 
 
 ### Project Documentation
-For Software:
+For Software:A professional, well-structured project documentation template for your Leaf Divination (AI Leaf Fortune Teller) web app. You can use this directly in your reports, README, or submissions—just add your images and links where needed. 
+Leaf Divination
+Leaf Divination is a web application that uses AI to generate poetic fortunes based on a photo of a leaf uploaded by the user. It analyzes visual features—color, shape, veins—and returns a mystical, personalized prophecy using the Google Gemini AI API. All logic runs in the browser with a clean, interactive UI.
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+Uploading Screenshot 2025-08-02 070728.png…
+INTRO
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+Uploading Screenshot 2025-08-02 073247.png…
 
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
+ADDING LEAF
 
-For Hardware:
 
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
+<img width="1920" height="1200" alt="Screenshot 2025-08-02 074237" src="https://github.com/user-attachments/assets/4b2c7e84-40fc-452f-8a2a-2e9cd194ed37" />
+PREDICTING THE FUTURE 
 
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
-
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
-
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
 
 ### Project Demo
 # Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
-
-# Additional Demos
-[Add any extra demo materials/links]
+https://youtu.be/l9vf6Keig64?si=u9zzn_ypMarHd8pJ
+SHOWING THE WORKING OF LEAF FORTUNE TELLER
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
-
+- NEERAJA R NAIR: BACKEND
+- ZENJITH A: FRONDEND AND DESIGN
+  
 ---
 Made with ❤️ at TinkerHub Useless Projects 
 
