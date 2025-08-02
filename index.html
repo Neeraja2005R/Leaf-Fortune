@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaf Divination - Vanilla JS</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles and animations */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: url(https://www.transparenttextures.com/patterns/natural-paper.png), linear-gradient(to bottom right, #e6f4e3, #d3e8d0);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-fade-in { animation: fadeInUp 0.5s ease-out both; }
+    </style>
+</head>
+<body class="bg-green-100 min-h-screen">
+
+    <div id="app-container" class="max-w-md mx-auto p-4 py-8">
+        <!-- App Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-4xl font-bold text-green-900 tracking-tight">
+                Leaf Divination
+            </h1>
+            <p class="text-green-700 mt-1">
+                Let nature's script reveal your story.
+            </p>
+        </header>
+
+        <!-- Main content area where the app will be rendered -->
+        <main id="main-content" class="bg-gray-50/70 backdrop-blur-md rounded-2xl shadow-lg p-6 min-h-[24rem] flex flex-col justify-center transition-all duration-500">
+            <!-- JavaScript will render content here -->
+        </main>
+
+        <!-- App Footer -->
+        <footer class="text-center pt-6">
+            <p class="text-xs text-green-800/60">
+                Powered by AI for maximum mystical insights. 🌱
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Application State ---
+        let state = {
+            imageFile: null,
+            previewUrl: "",
+            status: "idle", // 'idle', 'analyzing', 'success', 'error'
+            result: null,
+            error: "",
+        };
+
+        // --- DOM Element References ---
+        const mainContent = document.getElementById('main-content');
+
+        // --- Helper Functions ---
+
+        /**
+         * Clears all child nodes from a given DOM element.
+         * @param {HTMLElement} node The element to clear.
+         */
+        function clearNode(node) {
+            node.innerHTML = '';
+        }
+
+        /**
+         * Creates an SVG icon element from a path string.
+         * @param {string} path The SVG path data.
+         * @param {string} className Optional CSS classes.
+         * @returns {SVGSVGElement} The created SVG element.
+         */
+        function createFeatureIcon(path, className = "w-6 h-6") {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("class", className);
+            svg.setAttribute("fill", "none");
+            svg.setAttribute("viewBox", "0 0 24 24");
+            svg.setAttribute("stroke", "currentColor");
+            svg.setAttribute("stroke-width", "2");
+            const pathEl = document.createElementNS(svgNS, "path");
+            pathEl.setAttribute("stroke-linecap", "round");
+            pathEl.setAttribute("stroke-linejoin", "round");
+            pathEl.setAttribute("d", path);
+            svg.appendChild(pathEl);
+            return svg;
+        }
+        
+        /**
+         * Converts a File object to a base64 encoded string.
+         * @param {File} file The file to convert.
+         * @returns {Promise<string>} A promise that resolves with the base64 string.
+         */
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = (error) => reject(error);
+            });
+        }
+
+        // --- Core Application Logic ---
+
+        /**
+         * Resets the application to its initial state and re-renders the UI.
+         */
+        function resetApp() {
+            state.imageFile = null;
+            state.previewUrl = "";
+            state.status = "idle";
+            state.result = null;
+            state.error = "";
+            render();
+        }
+
+        /**
+         * Handles the file input change event.
+         * @param {Event} e The input change event.
+         */
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            resetApp(); // Reset state but don't clear the file from the input yet
+            state.imageFile = file;
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                state.previewUrl = reader.result;
+                render(); // Re-render to show the preview and analyze button
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /**
+         * Calls the Gemini API to analyze the leaf image.
+         */
+        async function analyzeLeaf() {
+            if (!state.imageFile) return;
+
+            state.status = 'analyzing';
+            state.error = "";
+            render();
+
+            try {
+                const base64ImageData = await toBase64(state.imageFile);
+                const apiKey = "AIzaSyChuAJBCwOUfJslxpmvx3sQvC0vjUmjfo8"; // Leave empty, handled by environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: "Analyze the leaf in this image in detail. Based on its visual characteristics (shape, color, veins, imperfections), provide a mystical and poetic divination. Respond ONLY with a JSON object using the specified schema. Be creative and descriptive. If it's not a leaf, provide an error in the 'leafName'. Example for a maple leaf: {\"leafName\": \"Maple Leaf\", \"mainColor\": \"Fiery Autumn Red\", \"shapeDescription\": \"Shaped like an open hand, with five distinct points reaching out to the world.\", \"veinPattern\": \"A network of prominent veins, like rivers of energy flowing from a central heartwood.\", \"imperfections\": \"Bears a single, perfectly round hole—a 'spirit window' offering a glimpse into other realms.\", \"elementalAffinity\": \"Fire\", \"leafPersonality\": \"An expressive and passionate soul, unafraid to show its true colors.\", \"prophecy\": \"Your path is one of transformation. Like this leaf, you will undergo a brilliant change, shedding the old to make way for a vibrant new beginning. Embrace the warmth of new opportunities.\"}" },
+                            { inlineData: { mimeType: state.imageFile.type, data: base64ImageData } }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "leafName": { "type": "STRING" }, "mainColor": { "type": "STRING" },
+                                "shapeDescription": { "type": "STRING" }, "veinPattern": { "type": "STRING" },
+                                "imperfections": { "type": "STRING" }, "elementalAffinity": { "type": "STRING" },
+                                "leafPersonality": { "type": "STRING" }, "prophecy": { "type": "STRING" }
+                            },
+                            required: ["leafName", "mainColor", "shapeDescription", "veinPattern", "imperfections", "elementalAffinity", "leafPersonality", "prophecy"]
+                        }
+                    }
+                };
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`API request failed. Status: ${response.status}`);
+                
+                const data = await response.json();
+
+                if (data.candidates && data.candidates.length > 0) {
+                    const aiResult = JSON.parse(data.candidates[0].content.parts[0].text);
+                    if (aiResult.leafName.toLowerCase().includes("not a leaf") || aiResult.leafName.toLowerCase().includes("error")) {
+                         throw new Error("The image does not appear to be a leaf. Please try another.");
+                    }
+                    state.result = aiResult;
+                    state.status = 'success';
+                } else {
+                    throw new Error("The AI could not provide a reading. The forest spirits are quiet today.");
+                }
+
+            } catch (err) {
+                console.error("Analysis failed:", err);
+                state.error = err.message || "An unknown error occurred. Please try again.";
+                state.status = 'error';
+            }
+            render();
+        }
+
+        // --- UI Rendering ---
+
+        /**
+         * Renders the UI based on the current application state.
+         */
+        function render() {
+            clearNode(mainContent);
+
+            switch (state.status) {
+                case 'analyzing':
+                    renderAnalyzing();
+                    break;
+                case 'success':
+                    renderSuccess();
+                    break;
+                case 'error':
+                    renderError();
+                    break;
+                case 'idle':
+                default:
+                    renderIdle();
+                    break;
+            }
+        }
+
+        function renderIdle() {
+            const container = document.createElement('div');
+            container.className = 'space-y-6';
+
+            const label = document.createElement('label');
+            label.htmlFor = 'file-upload';
+            label.className = 'w-full cursor-pointer bg-green-100 text-green-700 font-semibold text-center py-8 px-4 rounded-lg border-2 border-dashed border-green-300 hover:bg-green-200 hover:border-green-400 transition-all flex flex-col items-center justify-center space-y-2';
+            
+            label.appendChild(createFeatureIcon("M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12", "h-10 w-10 text-green-500"));
+            
+            const labelText = document.createElement('span');
+            labelText.textContent = state.imageFile ? `Selected: ${state.imageFile.name}` : 'Upload a Leaf Image';
+            label.appendChild(labelText);
+
+            const subText = document.createElement('span');
+            subText.className = 'text-xs text-green-600';
+            subText.textContent = 'Click to choose a file';
+            label.appendChild(subText);
+
+            const input = document.createElement('input');
+            input.id = 'file-upload';
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.className = 'hidden';
+            input.onchange = handleImageUpload;
+
+            container.appendChild(label);
+            container.appendChild(input);
+
+            if (state.previewUrl) {
+                const previewContainer = document.createElement('div');
+                previewContainer.className = 'text-center pt-4 space-y-4 animate-fade-in';
+                
+                const img = document.createElement('img');
+                img.src = state.previewUrl;
+                img.alt = 'Leaf preview';
+                img.className = 'w-32 h-32 object-cover mx-auto rounded-xl shadow-lg border-4 border-white';
+                previewContainer.appendChild(img);
+
+                const button = document.createElement('button');
+                button.textContent = "Divine My Leaf's Fortune";
+                button.className = 'w-full py-3 px-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 focus:ring-4 focus:ring-green-300 transition-all';
+                button.onclick = analyzeLeaf;
+                previewContainer.appendChild(button);
+                
+                container.appendChild(previewContainer);
+            }
+            mainContent.appendChild(container);
+        }
+
+        function renderAnalyzing() {
+            mainContent.innerHTML = `
+                <div class="text-center space-y-4 py-10">
+                    <div class="w-16 h-16 border-4 border-dashed rounded-full border-green-600 mx-auto" style="animation: spin 1s linear infinite;"></div>
+                    <h2 class="text-xl font-semibold text-green-700">Reading the Veins...</h2>
+                    <p class="text-gray-500">The leaf is sharing its story.</p>
+                </div>
+            `;
+        }
+
+        function renderError() {
+            mainContent.innerHTML = `
+                <div class="text-center space-y-4 p-6 bg-red-50 border-2 border-red-200 rounded-lg animate-fade-in">
+                    <p class="text-3xl">😟</p>
+                    <h2 class="font-bold text-red-800 text-xl">The Spirits are Confused</h2>
+                    <p class="text-red-700">${state.error}</p>
+                    <button id="reset-button" class="mt-4 px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-all">Try Again</button>
+                </div>
+            `;
+            document.getElementById('reset-button').onclick = resetApp;
+        }
+
+        function renderSuccess() {
+            const r = state.result;
+            const container = document.createElement('div');
+            container.className = 'space-y-6 animate-fade-in';
+            
+            // Header
+            container.innerHTML = `
+                <div class="text-center">
+                    <img src="${state.previewUrl}" alt="Analyzed leaf" class="w-40 h-40 object-cover mx-auto rounded-full shadow-2xl border-4 border-white -mt-20">
+                    <h2 class="text-3xl font-bold text-green-900 mt-4">${r.leafName}</h2>
+                    <p class="text-lg text-green-700 italic">"${r.leafPersonality}"</p>
+                </div>
+            `;
+
+            // Analysis Grid
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+            
+            const items = [
+                { icon: createFeatureIcon("M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L14.732 3.732z"), title: 'Color', text: r.mainColor, delay: 0.1 },
+                { icon: createFeatureIcon("M3 7l3-3m0 0l3 3M6 4v10m11-3l-3 3m0 0l-3-3m3 3V4"), title: 'Shape', text: r.shapeDescription, delay: 0.2 },
+                { icon: createFeatureIcon("M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"), title: 'Vein Pattern', text: r.veinPattern, delay: 0.3 },
+                { icon: createFeatureIcon("M5 12h14M12 5l7 7-7 7"), title: 'Unique Marks', text: r.imperfections, delay: 0.4 }
+            ];
+
+            items.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'bg-white/60 backdrop-blur-sm p-4 rounded-lg shadow-md border border-green-200/50 transform transition-all duration-500 hover:shadow-lg hover:scale-105';
+                itemEl.style.animation = `fadeInUp 0.5s ${item.delay}s both`;
+                itemEl.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex-shrink-0 text-green-700">${item.icon.outerHTML}</div>
+                        <div>
+                            <h3 class="font-bold text-green-900">${item.title}</h3>
+                            <p class="text-sm text-green-800">${item.text}</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(itemEl);
+            });
+            container.appendChild(grid);
+            
+            // Prophecy
+            const prophecyEl = document.createElement('div');
+            prophecyEl.className = 'bg-gradient-to-br from-green-700 to-green-900 text-white p-6 rounded-xl shadow-xl';
+            prophecyEl.style.animation = `fadeInUp 0.5s 0.5s both`;
+            prophecyEl.innerHTML = `
+                <h3 class="text-xl font-bold text-center mb-2 flex items-center justify-center gap-2">
+                    ${createFeatureIcon("M13 10V3L4 14h7v7l9-11h-7z").outerHTML}
+                    The Prophecy
+                </h3>
+                <p class="text-center text-green-100">${r.prophecy}</p>
+            `;
+            container.appendChild(prophecyEl);
+
+            // Reset Button
+            const resetButton = document.createElement('button');
+            resetButton.textContent = 'Read Another Leaf';
+            resetButton.className = 'w-full mt-4 px-6 py-3 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all focus:outline-none focus:ring-4 focus:ring-gray-400';
+            resetButton.onclick = resetApp;
+            container.appendChild(resetButton);
+
+            mainContent.appendChild(container);
+        }
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', render);
+
+    </script>
+</body>
+</html>
